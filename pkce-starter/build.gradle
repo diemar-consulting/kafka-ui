@@ -1,0 +1,24 @@
+plugins {
+    id 'java-library'
+    alias(libs.plugins.spring.dependency.management)
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${libs.versions.spring.boot.get()}"
+    }
+}
+
+dependencies {
+    compileOnly 'org.springframework.boot:spring-boot-autoconfigure'
+    compileOnly 'org.springframework.security:spring-security-oauth2-client'
+
+    testImplementation libs.spring.starter.test
+    testImplementation libs.spring.starter.oauth2.client
+    testImplementation libs.spring.starter.webflux
+    testImplementation libs.reactor.test
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
