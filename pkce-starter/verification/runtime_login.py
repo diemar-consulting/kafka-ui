@@ -132,7 +132,14 @@ with log.open("wb") as log_file:
         print("PASS: S256 code_challenge matches code_verifier at mock token endpoint")
     except Exception:
         log_file.flush()
-        print(log.read_text(errors="replace")[-14000:], flush=True)
+        application_log = log.read_text(errors="replace")
+        print("OAuth mock events:", {key: bool(value) for key, value in events.items()}, flush=True)
+        diagnostic_lines = application_log.splitlines()
+        for index, line in enumerate(diagnostic_lines):
+            if ("ERROR " in line or "Exception:" in line or "Caused by:" in line
+                    or "500 INTERNAL_SERVER_ERROR" in line):
+                print("\\n".join(diagnostic_lines[max(0, index - 3):index + 14]), flush=True)
+        print("Final application output:\\n" + application_log[-12000:], flush=True)
         raise
     finally:
         proc.terminate()
