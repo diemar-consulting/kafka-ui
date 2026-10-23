@@ -2,7 +2,7 @@ name: "SonarCloud: Push analysis"
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "sonar-main-pr" ]
     paths:
       - "api/**"
       - "serde-api/**"
