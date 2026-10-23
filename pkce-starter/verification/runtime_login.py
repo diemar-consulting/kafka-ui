@@ -108,7 +108,14 @@ with log.open("wb") as log_file:
     try:
         base = f"http://127.0.0.1:{app_port}"
         jar = http.cookiejar.CookieJar()
-        browser = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+        class StopAfterCallback(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, req, fp, code, msg, headers, newurl):
+                if urllib.parse.urlparse(req.full_url).path == "/login/oauth2/code/test":
+                    return None
+                return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+        browser = urllib.request.build_opener(
+            urllib.request.HTTPCookieProcessor(jar), StopAfterCallback())
         ready = False
         for _ in range(120):
             if proc.poll() is not None:
@@ -120,14 +127,24 @@ with log.open("wb") as log_file:
             except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError):
                 time.sleep(1)
         assert ready, "Application never became reachable"
-        with browser.open(base + "/oauth2/authorization/test", timeout=30) as response:
-            landing = response.geturl()
-            status = response.status
-            response.read()
+        try:
+            with browser.open(base + "/oauth2/authorization/test", timeout=30) as response:
+                raise AssertionError(f"Expected successful callback redirect, got {response.status}")
+        except urllib.error.HTTPError as callback:
+            assert callback.code in (302, 303), (
+                f"Login callback failed: HTTP {callback.code}, {callback.url}")
+            assert urllib.parse.urlparse(callback.url).path == "/login/oauth2/code/test", (
+                f"Unexpected redirect: {callback.url}")
+            landing = callback.headers.get("Location")
+            assert landing is not None, "Missing post-login Location header"
+            assert "error" not in urllib.parse.urlparse(landing).query, landing
+            status = callback.code
+            callback.close()
         assert events["authorize"], "Authorization endpoint not reached"
         assert events["token"], "Token endpoint not reached"
         assert events["userinfo"], "Userinfo endpoint not reached: login did not finish"
-        assert "/login?error" not in landing, f"OAuth2 login failure: {landing}"
+        assert any(cookie.name == "SESSION" for cookie in jar), (
+            "OAuth login did not establish a session cookie")
         print(f"PASS: untouched Kafbat bootJar + external starter: login HTTP {status}, landing {landing}")
         print("PASS: S256 code_challenge matches code_verifier at mock token endpoint")
     except Exception:
