@@ -12,3 +12,4 @@ include "serde-api"
 include "api"
 include "frontend"
 
+include "pkce-starter"
