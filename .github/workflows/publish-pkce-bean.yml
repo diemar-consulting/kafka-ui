@@ -1,6 +1,10 @@
 name: Publish PKCE bean image (manual)
 
 on:
+  push:
+    branches: [pkce-bean]
+    paths:
+      - '.github/workflows/publish-pkce-bean.yml'
   workflow_dispatch:
     inputs:
       version:
@@ -30,7 +34,7 @@ jobs:
       - name: Validate image version
         id: version
         env:
-          IMAGE_VERSION: ${{ inputs.version }}
+          IMAGE_VERSION: ${{ inputs.version || '1.5.0' }}
         run: |
           if [[ ! "$IMAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$ ]]; then
             echo "Invalid image version: $IMAGE_VERSION" >&2
@@ -39,7 +43,13 @@ jobs:
           echo "tag=${IMAGE_VERSION}-pkce-bean" >> "$GITHUB_OUTPUT"
       - name: Verify external starter and unchanged application JAR
         run: |
-          ./gradlew :pkce-starter:check :pkce-starter:jar :api:bootJar
+          ./gradlew -Pinclude-frontend=true :pkce-starter:check :pkce-starter:jar :api:bootJar
+          jar_file=$(find api/build/libs -maxdepth 1 -name 'api-*.jar' ! -name '*plain*' -print -quit)
+          test -n "$jar_file"
+          unzip -Z1 "$jar_file" | grep -Fxq 'BOOT-INF/classes/static/index.html' || {
+            echo "Missing frontend static/index.html in $jar_file" >&2
+            exit 1
+          }
           python3 pkce-starter/verification/runtime_login.py
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
