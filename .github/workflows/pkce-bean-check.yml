@@ -1,0 +1,23 @@
+name: PKCE bean starter check
+
+on:
+  push:
+    branches:
+      - pkce-bean
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  starter-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version-file: .java-version
+          cache: gradle
+      - name: Verify standalone PKCE starter
+        run: ./gradlew :pkce-starter:check :pkce-starter:jar
