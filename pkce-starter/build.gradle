@@ -17,6 +17,7 @@ dependencies {
     testImplementation libs.spring.starter.oauth2.client
     testImplementation libs.spring.starter.webflux
     testImplementation libs.reactor.test
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
