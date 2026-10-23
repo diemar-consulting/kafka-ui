@@ -19,5 +19,7 @@ jobs:
           distribution: zulu
           java-version-file: .java-version
           cache: gradle
-      - name: Verify standalone PKCE starter
-        run: ./gradlew :pkce-starter:check :pkce-starter:jar
+      - name: Verify starter and build unchanged application JAR
+        run: ./gradlew :pkce-starter:check :pkce-starter:jar :api:bootJar
+      - name: Verify external JAR loading and OAuth2 login with mock IdP
+        run: python3 pkce-starter/verification/runtime_login.py
