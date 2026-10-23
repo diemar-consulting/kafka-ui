@@ -2,6 +2,16 @@
 > 
 > Read the [PKCE implementation README](docs/pkce/README.md) or the [starter module README](pkce-starter/README.md) for configuration, deployment and runtime tests.
 
+## PKCE Bean Docker image
+
+The externally loaded PKCE starter image has been published to GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/diemar-consulting/kafka-ui:1.5.0-pkce-bean
+```
+
+[Container package](https://github.com/orgs/diemar-consulting/packages/container/package/kafka-ui) · [Successful publishing run](https://github.com/diemar-consulting/kafka-ui/actions/runs/39954300624) · [Starter documentation](pkce-starter/README.md)
+
 ---
 
 <div align="center">
