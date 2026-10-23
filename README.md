@@ -1,3 +1,9 @@
+> **This branch: PKCE via external Spring Boot starter JAR (no Kafbat application rebuild).**
+> 
+> Read the [PKCE implementation README](docs/pkce/README.md) or the [starter module README](pkce-starter/README.md) for configuration, deployment and runtime tests.
+
+---
+
 <div align="center">
 <img src="documentation/images/logo_new.png" alt="logo"/>
 <h3>Kafbat UI</h3>
